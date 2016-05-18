@@ -25,7 +25,6 @@ class DraggableRectangle:
         contains, _attrd = self.rect.contains(event)
         if not contains:
             return
-        print('event contains', self.rect.xy)
         x0, y0 = self.rect.xy
         self.press = x0, y0, event.xdata, event.ydata
 
@@ -54,13 +53,15 @@ class DraggableRectangle:
         self.rect.figure.canvas.mpl_disconnect(self.cidrelease)
         self.rect.figure.canvas.mpl_disconnect(self.cidmotion)
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-rects = ax.bar(range(10), 20*np.random.rand(10))
-drs = []
-for rect in rects:
-    dr = DraggableRectangle(rect)
-    dr.connect()
-    drs.append(dr)
-
-plt.show()
+if __name__ == '__main__':
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    rects = ax.bar(range(10), 20*np.random.rand(10))
+    drs = []
+    print rects
+    for rect in rects:
+        print rect
+        dr = DraggableRectangle(rect)
+        dr.connect()
+        drs.append(dr)
+    plt.show()
