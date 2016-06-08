@@ -25,8 +25,14 @@ class OfficeObject:
         contains, _attrd = self.rect.contains(event)
         if not contains:
             return
-        x0, y0 = self.rect.xy
-        self.press = x0, y0, event.xdata, event.ydata
+
+        if event.button == 1:
+            x0, y0 = self.rect.xy
+            self.press = x0, y0, event.xdata, event.ydata
+        else:
+            w, h = self.rect.get_width(), self.rect.get_height()
+            self.rect.set_width(h)
+            self.rect.set_height(w)
 
     def on_motion(self, event):
         '''on motion we will move the rect if the mouse is over us'''

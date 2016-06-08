@@ -1,4 +1,4 @@
-from drag_rect import DraggableRectangle
+from new_drag_rect import OfficeObject as DraggableRectangle
 import matplotlib.pyplot as plt
 import sys
 import numpy as np
@@ -11,6 +11,12 @@ ax = fig.add_subplot(111, aspect='equal')
 ax.set_xlim(0, 406+281)
 ax.set_ylim(0, 353)
 ax.axvline(406, color='black')
+plt.xticks(np.arange(0, 406+281, 12))
+plt.yticks(np.arange(0, 353, 12))
+for tick in ax.axes.get_xticklabels():
+    tick.set_visible(False)
+for tick in ax.axes.get_yticklabels():
+    tick.set_visible(False)
 prohibited_rects = [[0, 0, 132.5, 98],
                     [114, 338, 18.5, 15],
                     [401, 0, 5, 14.5],
@@ -33,7 +39,7 @@ if len(sys.argv) == 2:
     fn = sys.argv[1]
 else:
     fn = 'default.csv'
-types = 'S64,S64,f8,f8,i8,f8,f8'
+types = 'S64,S64,f8,f8,f8,f8'
 objs = np.genfromtxt(fn, dtype=types, delimiter=',', names=True)
 
 # Plot all of the objects
@@ -46,14 +52,17 @@ for obj in objs:
     # Branching colors for different object types
     if obj['type'] == 'desk':
         col = 'blue'
+        name = obj['name']
     if obj['type'] == 'book':
         col = 'green'
+        name = obj['name']
     if obj['type'] == 'div':
         col = 'black'
-    rect = ax.bar(left=(1-obj['rot'])*obj['x0']+obj['rot']*obj['y0'],
-                  bottom=(1-obj['rot'])*obj['y0']+obj['rot']*obj['x0'],
-                  width=(1-obj['rot'])*obj['len']+obj['rot']*obj['wid'],
-                  height=(1-obj['rot'])*obj['wid']+obj['rot']*obj['len'],
+        name = ''
+    rect = ax.bar(left=obj['x0'],
+                  bottom=obj['y0'],
+                  width=obj['wid'],
+                  height=obj['len'],
                   color=col, alpha=0.5)
     drag_rect = DraggableRectangle(rect[0])
     drag_rect.connect()
@@ -62,13 +71,17 @@ for obj in objs:
 plt.show()
 
 # Replace the object array with our relocated objects from the plot
+for obj, drag_rect in zip(objs, drag_rects):
+    (obj['x0'], obj['y0']) = drag_rect.rect.xy
+    obj['wid'] = drag_rect.rect.get_width()
+    obj['len'] = drag_rect.rect.get_height()
 
 # Save locations for future loading
 for i in range(100):
     if not isfile('save'+str(i).zfill(2)+'.csv'):
         np.savetxt('save'+str(i).zfill(2)+'.csv', objs, delimiter=',',
-                   fmt=['%s', '%s', '%f', '%f', '%i', '%f', '%f'],
-                   header='name,type,len,wid,rot,x0,y0',
+                   fmt=['%s', '%s', '%f', '%f', '%f', '%f'],
+                   header='name,type,len,wid,x0,y0',
                    comments='')
         break
     if i == 99:
